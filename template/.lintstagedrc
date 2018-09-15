@@ -1,0 +1,5 @@
+{
+  "src/**/*.+(ts|tsx)": ["tslint -c tslint.json -p tsconfig.json -t verbose --fix", "git add"],
+  "config/**/*.js": ["eslint --fix", "git add"],
+  "scripts/**/*.js": ["eslint --fix", "git add"]
+}
