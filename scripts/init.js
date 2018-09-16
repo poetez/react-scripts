@@ -101,24 +101,16 @@ module.exports = function(
     '@babel/core',
     '@babel/plugin-proposal-object-rest-spread',
     '@babel/plugin-syntax-dynamic-import',
-    '@babel/preset-typescript',
     '@types/jest',
     '@types/node',
     '@types/react',
     '@types/react-dom',
+    'autoprefixer',
     'cssnano',
     'husky',
     'lint-staged',
-    'postcss-calc',
-    'postcss-discard-comments',
-    'postcss-extend',
-    'postcss-flexbugs-fixes',
     'postcss-import',
-    'postcss-inline-svg',
-    'postcss-mixins',
     'postcss-preset-env',
-    'postcss-remove-root',
-    'postcss-svgo',
     'tslint',
     'tslint-config-poetez',
     'typescript',
@@ -126,10 +118,10 @@ module.exports = function(
 
   if (useYarn) {
     command = 'yarnpkg';
-    args = ['add'];
+    args = ['add', '--dev', ...dependencies];
   } else {
     command = 'npm';
-    args = ['install', '--save', verbose && '--verbose'].filter(e => e);
+    args = ['install', '--save-dev', verbose && '--verbose', ...dependencies].filter(e => e);
   }
 
   // Install additional template dependencies, if present

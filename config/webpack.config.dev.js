@@ -13,9 +13,10 @@ const path = require('path');
 const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CaseSensitivePathsPlugin = require('case-sensitive-paths-webpack-plugin');
-const InterpolateHtmlPlugin = require('react-dev-utils/InterpolateHtmlPlugin');
-const WatchMissingNodeModulesPlugin = require('react-dev-utils/WatchMissingNodeModulesPlugin');
+const InterpolateHtmlPlugin = require('@nenado/interpolate-html-plugin');
+const WatchMissingNodeModulesPlugin = require('@nenado/watch-missing-node-modules-plugin');
 const ModuleScopePlugin = require('react-dev-utils/ModuleScopePlugin');
+const ManifestPlugin = require('webpack-manifest-plugin');
 const getClientEnvironment = require('./env');
 const paths = require('./paths');
 const custom = require('./custom');
@@ -46,11 +47,14 @@ const getStyleLoaders = (cssOptions, options, loader) => {
       // Adds vendor prefixing based on your specified browser support in
       // package.json
       loader: require.resolve('postcss-loader'),
-      options: {
+      options: !loader && options ? {
+        ident: 'postcss',
+        ...options,
+      } : {
         // Necessary for external CSS imports to work
         // https://github.com/facebook/create-react-app/issues/2677
         ident: 'postcss',
-        plugins: !loader && options ? options : () => [
+        plugins: () => [
           require('postcss-flexbugs-fixes'),
           autoprefixer({
             flexbox: 'no-2009',
@@ -117,6 +121,8 @@ const getCssLoaders = (config) => [
         )
       });
     }
+
+    return acc;
   }, [])
 ];
 
@@ -255,19 +261,31 @@ module.exports = {
           {
             test: /\.(ts|tsx|js|jsx|mjs)$/,
             include: paths.appSrc,
-            loader: require.resolve('babel-loader'),
-            options: {
-              // @remove-on-eject-begin
-              babelrc: false,
-              ...custom.babelrc,
-              // @remove-on-eject-end
-              // This is a feature of `babel-loader` for webpack (not Babel itself).
-              // It enables caching results in ./node_modules/.cache/babel-loader/
-              // directory for faster rebuilds.
-              cacheDirectory: true,
-              cacheCompression: false,
-              highlightCode: true,
-            },
+            use: [
+              // This loader parallelizes code compilation, it is optional but
+              // improves compile time on larger projects
+              {
+                loader: require.resolve('thread-loader'),
+                options: {
+                  poolTimeout: Infinity // keep workers alive for more effective watch mode
+                },
+              },
+              {
+                loader: require.resolve('babel-loader'),
+                options: {
+                  // @remove-on-eject-begin
+                  babelrc: false,
+                  ...custom.babelrc,
+                  // @remove-on-eject-end
+                  // This is a feature of `babel-loader` for webpack (not Babel itself).
+                  // It enables caching results in ./node_modules/.cache/babel-loader/
+                  // directory for faster rebuilds.
+                  cacheDirectory: true,
+                  cacheCompression: false,
+                  highlightCode: true,
+                },
+              }
+            ]
           },
           ...getCssLoaders(custom.css),
 
@@ -303,6 +321,7 @@ module.exports = {
     // The public URL is available as %PUBLIC_URL% in index.html, e.g.:
     // <link rel="shortcut icon" href="%PUBLIC_URL%/favicon.ico">
     // In development, this will be an empty string.
+    // NOTE: Be sure that you put it AFTER the HtmlWebpackPlugin; otherwise it won't work
     new InterpolateHtmlPlugin({
       ...env.raw,
       ...custom.resources,

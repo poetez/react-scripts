@@ -1,7 +1,8 @@
 'use strict';
 
+// Don't include @babel/preset-typescript and @babel/preset-react.
+// They are included by default
 module.exports = {
-  presets: [require('@babel/preset-typescript')],
   plugins: [
     require('@babel/plugin-proposal-object-rest-spread'), {
       loose: true,
