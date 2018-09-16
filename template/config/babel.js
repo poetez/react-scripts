@@ -8,6 +8,7 @@ module.exports = {
       loose: true,
       useBuiltIns: true,
     },
+    require('@babel/plugin-proposal-class-properties'),
     require('@babel/plugin-syntax-dynamic-import'),
   ],
 };
