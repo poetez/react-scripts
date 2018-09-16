@@ -289,22 +289,15 @@ module.exports = {
           {
             test: /\.(ts|tsx|js|jsx|mjs)$/,
             include: paths.appSrc,
-            use: [
-              // This loader parallelizes code compilation, it is optional but
-              // improves compile time on larger projects
-              require.resolve('thread-loader'),
-              {
-                loader: require.resolve('babel-loader'),
-                options: {
-                  // @remove-on-eject-begin
-                  babelrc: false,
-                  ...custom.babelrc,
-                  // @remove-on-eject-end
-                  compact: true,
-                  highlightCode: true,
-                },
-              }
-            ]
+            loader: require.resolve('babel-loader'),
+            options: {
+              // @remove-on-eject-begin
+              babelrc: false,
+              ...custom.babelrc,
+              // @remove-on-eject-end
+              compact: true,
+              highlightCode: true,
+            },
           },
           ...getCssLoaders(custom.css),
           // The GraphQL loader preprocesses GraphQL queries in .graphql files.

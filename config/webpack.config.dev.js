@@ -261,31 +261,19 @@ module.exports = {
           {
             test: /\.(ts|tsx|js|jsx|mjs)$/,
             include: paths.appSrc,
-            use: [
-              // This loader parallelizes code compilation, it is optional but
-              // improves compile time on larger projects
-              {
-                loader: require.resolve('thread-loader'),
-                options: {
-                  poolTimeout: Infinity // keep workers alive for more effective watch mode
-                },
-              },
-              {
-                loader: require.resolve('babel-loader'),
-                options: {
-                  // @remove-on-eject-begin
-                  babelrc: false,
-                  ...custom.babelrc,
-                  // @remove-on-eject-end
-                  // This is a feature of `babel-loader` for webpack (not Babel itself).
-                  // It enables caching results in ./node_modules/.cache/babel-loader/
-                  // directory for faster rebuilds.
-                  cacheDirectory: true,
-                  cacheCompression: false,
-                  highlightCode: true,
-                },
-              }
-            ]
+            loader: require.resolve('babel-loader'),
+            options: {
+              // @remove-on-eject-begin
+              babelrc: false,
+              ...custom.babelrc,
+              // @remove-on-eject-end
+              // This is a feature of `babel-loader` for webpack (not Babel itself).
+              // It enables caching results in ./node_modules/.cache/babel-loader/
+              // directory for faster rebuilds.
+              cacheDirectory: true,
+              cacheCompression: false,
+              highlightCode: true,
+            },
           },
           ...getCssLoaders(custom.css),
 
