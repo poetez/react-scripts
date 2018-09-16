@@ -19,7 +19,7 @@ const ModuleScopePlugin = require('react-dev-utils/ModuleScopePlugin');
 const ManifestPlugin = require('webpack-manifest-plugin');
 const getClientEnvironment = require('./env');
 const paths = require('./paths');
-const babelRuntimeExternals = require('babelRuntimeExternals');
+const babelRuntimeExternals = require('./babelRuntimeExternals');
 const customConfig = require('./customConfig');
 
 // Webpack uses `publicPath` to determine where the app is being served from.

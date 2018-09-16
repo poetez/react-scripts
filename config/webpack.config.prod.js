@@ -21,7 +21,7 @@ const SWPrecacheWebpackPlugin = require('sw-precache-webpack-plugin');
 const ModuleScopePlugin = require('react-dev-utils/ModuleScopePlugin');
 const paths = require('./paths');
 const getClientEnvironment = require('./env');
-const babelRuntimeExternals = require('babelRuntimeExternals');
+const babelRuntimeExternals = require('./babelRuntimeExternals');
 const customConfig = require('./customConfig');
 
 // Webpack uses `publicPath` to determine where the app is being served from.
