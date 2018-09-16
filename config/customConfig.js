@@ -14,6 +14,11 @@ const babelrc = (() => {
     require('@babel/preset-react'),
   ];
 
+  babelConfig.plugins = [
+    ...babelConfig.plugins || [],
+    require('./babel-plugin-remove-dts'),
+  ];
+
   return babelConfig;
 })();
 
