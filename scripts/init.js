@@ -42,10 +42,6 @@ module.exports = function(
     test: 'react-scripts test --env=jsdom',
     eject: 'react-scripts eject',
     precommit: 'lint-staged',
-    lint: 'run-p lint:*',
-    'lint:src': 'tslint "src/**/*.+(ts|tsx)" -c tslint.json -p tsconfig.json -t verbose',
-    'lint:config': 'eslint "config/**/*.js"',
-    'lint:scripts': 'eslint "scripts/**/*.js"',
   };
 
   fs.writeFileSync(
