@@ -1,9 +1,9 @@
-import React, { Component } from 'react';
+import * as React from 'react';
 import * as logo from './logo.svg';
 import './App.css';
 
-class App extends Component {
-  render() {
+export default class App extends React.Component {
+  public render(): React.ReactNode {
     return (
       <div className="App">
         <header className="App-header">
@@ -17,5 +17,3 @@ class App extends Component {
     );
   }
 }
-
-export default App;
