@@ -60,6 +60,12 @@ module.exports = {
   appNodeModules: resolveApp('node_modules'),
   publicUrl: getPublicUrl(resolveApp('package.json')),
   servedPath: getServedPath(resolveApp('package.json')),
+
+  configAliases: resolveApp('config/aliases.js'),
+  configBabel: resolveApp('config/babel.js'),
+  configCss: resolveApp('config/css.js'),
+  configProxy: resolveApp('config/proxy.js'),
+  configResources: resolveApp('config/resources.js'),
 };
 
 // @remove-on-eject-begin
@@ -83,6 +89,12 @@ module.exports = {
   // These properties only exist before ejecting:
   ownPath: resolveOwn('.'),
   ownNodeModules: resolveOwn('node_modules'), // This is empty on npm 3
+
+  configAliases: resolveApp('config/aliases.js'),
+  configBabel: resolveApp('config/babel.js'),
+  configCss: resolveApp('config/css.js'),
+  configProxy: resolveApp('config/proxy.js'),
+  configResources: resolveApp('config/resources.js'),
 };
 
 const ownPackageJson = require('../package.json');
@@ -113,6 +125,12 @@ if (
     // These properties only exist before ejecting:
     ownPath: resolveOwn('.'),
     ownNodeModules: resolveOwn('node_modules'),
+
+    configAliases: resolveApp('config/aliases.js'),
+    configBabel: resolveApp('config/babel.js'),
+    configCss: resolveApp('config/css.js'),
+    configProxy: resolveApp('config/proxy.js'),
+    configResources: resolveApp('config/resources.js'),
   };
 }
 // @remove-on-eject-end

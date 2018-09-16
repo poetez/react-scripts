@@ -19,7 +19,7 @@ const ModuleScopePlugin = require('react-dev-utils/ModuleScopePlugin');
 const ManifestPlugin = require('webpack-manifest-plugin');
 const getClientEnvironment = require('./env');
 const paths = require('./paths');
-const custom = require('./custom');
+const customConfig = require('./customConfig');
 
 // Webpack uses `publicPath` to determine where the app is being served from.
 // In development, we always serve from the root. This makes config easier.
@@ -213,7 +213,7 @@ module.exports = {
       '@babel/runtime': path.dirname(
         require.resolve('@babel/runtime/package.json')
       ),
-      ...custom.aliases,
+      ...customConfig.aliases,
       // @remove-on-eject-end
       // Support React Native Web
       // https://www.smashingmagazine.com/2016/08/a-glimpse-into-the-future-with-react-native-for-web/
@@ -257,7 +257,7 @@ module.exports = {
             options: {
               // @remove-on-eject-begin
               babelrc: false,
-              ...custom.babelrc,
+              ...customConfig.babelrc,
               // @remove-on-eject-end
               // This is a feature of `babel-loader` for webpack (not Babel itself).
               // It enables caching results in ./node_modules/.cache/babel-loader/
@@ -267,7 +267,7 @@ module.exports = {
               highlightCode: true,
             },
           },
-          ...getCssLoaders(custom.css),
+          ...getCssLoaders(customConfig.css),
 
           // "file" loader makes sure those assets get served by WebpackDevServer.
           // When you `import` an asset, you get its (virtual) filename.
@@ -304,7 +304,7 @@ module.exports = {
     // NOTE: Be sure that you put it AFTER the HtmlWebpackPlugin; otherwise it won't work
     new InterpolateHtmlPlugin({
       ...env.raw,
-      ...custom.resources,
+      ...customConfig.resources,
     }),
     // Makes some environment variables available to the JS code, for example:
     // if (process.env.NODE_ENV === 'development') { ... }. See `./env.js`.
