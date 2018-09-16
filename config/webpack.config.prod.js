@@ -21,6 +21,7 @@ const SWPrecacheWebpackPlugin = require('sw-precache-webpack-plugin');
 const ModuleScopePlugin = require('react-dev-utils/ModuleScopePlugin');
 const paths = require('./paths');
 const getClientEnvironment = require('./env');
+const babelRuntimeExternals = require('babelRuntimeExternals');
 const customConfig = require('./customConfig');
 
 // Webpack uses `publicPath` to determine where the app is being served from.
@@ -151,6 +152,12 @@ module.exports = {
   devtool: shouldUseSourceMap ? 'source-map' : false,
   // In production, we only want to load the polyfills and the app code.
   entry: paths.appIndex,
+  externals: [
+    babelRuntimeExternals,
+    {
+      'object-assign': 'Object.assign',
+    },
+  ],
   output: {
     // The build folder.
     path: paths.appBuild,

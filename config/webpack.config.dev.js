@@ -19,6 +19,7 @@ const ModuleScopePlugin = require('react-dev-utils/ModuleScopePlugin');
 const ManifestPlugin = require('webpack-manifest-plugin');
 const getClientEnvironment = require('./env');
 const paths = require('./paths');
+const babelRuntimeExternals = require('babelRuntimeExternals');
 const customConfig = require('./customConfig');
 
 // Webpack uses `publicPath` to determine where the app is being served from.
@@ -154,6 +155,12 @@ module.exports = {
     // We include the app code last so that if there is a runtime error during
     // initialization, it doesn't blow up the WebpackDevServer client, and
     // changing JS code would still trigger a refresh.
+  ],
+  externals: [
+    babelRuntimeExternals,
+    {
+      'object-assign': 'Object.assign',
+    },
   ],
   output: {
     // Add /* filename */ comments to generated require()s in the output.
