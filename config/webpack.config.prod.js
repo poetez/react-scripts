@@ -123,12 +123,13 @@ const getCssLoaders = (config) => [
       acc.push({
         test: module,
         include: paths.appSrc,
+        exclude: global,
         use: getStyleLoaders(
           {
             importLoaders: loader ? 2 : 1,
-            module: true,
+            modules: true,
             camelCase: true,
-            getLocalIdent: '[name]__[local]--[hash:base64:5]',
+            localIdentName: '[name]__[local]--[hash:base64:5]',
           },
           options,
           loader,
