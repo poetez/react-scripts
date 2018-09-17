@@ -347,7 +347,34 @@ module.exports = {
         removeEmptyAttributes: true,
         removeStyleLinkTypeAttributes: true,
         keepClosingSlash: true,
-        minifyJS: true,
+        minifyJS: (file) => {
+          const {code} = require('uglify-es').minify(file, {
+            parse: {
+              ecma: 8,
+            },
+            compress: {
+              warnings: false,
+              // Disabled because of an issue with Uglify breaking seemingly valid code:
+              // https://github.com/facebook/create-react-app/issues/2376
+              // Pending further investigation:
+              // https://github.com/mishoo/UglifyJS2/issues/2011
+              comparisons: false,
+            },
+            mangle: {
+              safari10: true,
+              toplevel: true,
+            },
+            output: {
+              ecma: 8,
+              comments: false,
+              // Turned on because emoji and regex is not minified properly using default
+              // https://github.com/facebook/create-react-app/issues/2488
+              ascii_only: true,
+            },
+          });
+
+          return code;
+        },
         minifyCSS: true,
         minifyURLs: true,
       },
