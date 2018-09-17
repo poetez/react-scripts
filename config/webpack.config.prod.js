@@ -177,7 +177,7 @@ module.exports = {
         minify: (file) => {
           const extractedComments = [];
 
-          const {error, map, code, warnings} = require('uglify-es').minify(file, {
+          const {error, map, code, warnings} = require('terser').minify(file, {
             parse: {
               ecma: 8,
             },
@@ -348,7 +348,7 @@ module.exports = {
         removeStyleLinkTypeAttributes: true,
         keepClosingSlash: true,
         minifyJS: (file) => {
-          const {code} = require('uglify-es').minify(file, {
+          const {code} = require('terser').minify(file, {
             parse: {
               ecma: 8,
             },
