@@ -41,7 +41,10 @@ module.exports = function(
     build: 'react-scripts build',
     test: 'react-scripts test --env=jsdom',
     eject: 'react-scripts eject',
-    precommit: 'lint-staged',
+    precommit: 'typecheck && lint-staged',
+    typecheck: 'tsc -p tsconfig.json --noEmit',
+    lint: 'tslint "src/**/*.+(ts|tsx)" -c tslint.json -p tsconfig.json -t verbose',
+    'lint-staged': 'lint-staged',
   };
 
   fs.writeFileSync(
@@ -201,12 +204,3 @@ module.exports = function(
   console.log();
   console.log('Happy hacking!');
 };
-
-function isReactInstalled(appPackage) {
-  const dependencies = appPackage.dependencies || {};
-
-  return (
-    typeof dependencies.react !== 'undefined' &&
-    typeof dependencies['react-dom'] !== 'undefined'
-  );
-}
