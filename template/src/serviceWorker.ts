@@ -20,7 +20,12 @@ const isLocalhost = Boolean(
   ),
 );
 
-const register = (): void => {
+export interface ServiceWorkerConfig {
+  readonly onSuccess?: (registration: ServiceWorkerRegistration) => void;
+  readonly onUpdate?: (registration: ServiceWorkerRegistration) => void;
+}
+
+export const register = (config: ServiceWorkerConfig = {}) => {
   if (process.env.NODE_ENV === 'production' && 'serviceWorker' in navigator) {
     // The URL constructor is available in all browsers that support SW.
     const publicUrl = new URL(process.env.PUBLIC_URL!, String(window.location));
@@ -35,8 +40,8 @@ const register = (): void => {
       const swUrl = `${process.env.PUBLIC_URL}/service-worker.js`;
 
       if (isLocalhost) {
-        // This is running on localhost. Lets check if a service worker still exists or not.
-        await checkValidServiceWorker(swUrl);
+        // This is running on localhost. Let's check if a service worker still exists or not.
+        await checkValidServiceWorker(swUrl, config);
 
         // Add some additional logging to localhost, pointing developers to the
         // service worker/PWA documentation.
@@ -48,16 +53,15 @@ const register = (): void => {
         );
       } else {
         // Is not local host. Just register service worker
-        await registerValidSW(swUrl);
+        await registerValidSW(swUrl, config);
       }
     });
   }
 };
 
-const registerValidSW = async (swUrl: string): Promise<void> => {
+const registerValidSW = async (swUrl: string, config: ServiceWorkerConfig): Promise<void> => {
   try {
     const registration = await navigator.serviceWorker.register(swUrl);
-
     registration.onupdatefound = () => {
       const installingWorker = registration.installing!;
 
@@ -69,11 +73,21 @@ const registerValidSW = async (swUrl: string): Promise<void> => {
             // It's the perfect time to display a "New content is
             // available; please refresh." message in your web app.
             console.log('New content is available; please refresh.');
+
+            // Execute callback
+            if (config.onUpdate) {
+              config.onUpdate(registration);
+            }
           } else {
             // At this point, everything has been precached.
             // It's the perfect time to display a
             // "Content is cached for offline use." message.
             console.log('Content is cached for offline use.');
+
+            // Execute callback
+            if (config.onSuccess) {
+              config.onSuccess(registration);
+            }
           }
         }
       };
@@ -83,7 +97,7 @@ const registerValidSW = async (swUrl: string): Promise<void> => {
   }
 };
 
-const checkValidServiceWorker = async (swUrl: string): Promise<void> => {
+const checkValidServiceWorker = async (swUrl: string, config: ServiceWorkerConfig): Promise<void> => {
   try {
     // Check if the service worker can be found. If it can't reload the page.
     const response: Response = await fetch(swUrl);
@@ -100,7 +114,7 @@ const checkValidServiceWorker = async (swUrl: string): Promise<void> => {
       window.location.reload();
     } else {
       // Service worker found. Proceed as normal.
-      await registerValidSW(swUrl);
+      await registerValidSW(swUrl, config);
     }
   } catch (e) {
     console.log(
@@ -115,5 +129,3 @@ export const unregister = async (): Promise<void> => {
     await registration.unregister();
   }
 };
-
-export default register;
