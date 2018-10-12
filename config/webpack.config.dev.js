@@ -8,17 +8,19 @@
 // @remove-on-eject-end
 'use strict';
 
-const autoprefixer = require('autoprefixer');
 const path = require('path');
 const webpack = require('webpack');
+const PnpWebpackPlugin = require('pnp-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CaseSensitivePathsPlugin = require('case-sensitive-paths-webpack-plugin');
-const InterpolateHtmlPlugin = require('@nenado/interpolate-html-plugin');
-const WatchMissingNodeModulesPlugin = require('@nenado/watch-missing-node-modules-plugin');
+const InterpolateHtmlPlugin = require('react-dev-utils/InterpolateHtmlPlugin');
+const WatchMissingNodeModulesPlugin = require('react-dev-utils/WatchMissingNodeModulesPlugin');
 const ModuleScopePlugin = require('react-dev-utils/ModuleScopePlugin');
-const ManifestPlugin = require('webpack-manifest-plugin');
 const getClientEnvironment = require('./env');
 const paths = require('./paths');
+const ManifestPlugin = require('webpack-manifest-plugin');
+const getCacheIdentifier = require('react-dev-utils/getCacheIdentifier');
+const ModuleNotFoundPlugin = require('react-dev-utils/ModuleNotFoundPlugin');
 const babelRuntimeExternals = require('./babelRuntimeExternals');
 const customConfig = require('./customConfig');
 
@@ -57,8 +59,11 @@ const getStyleLoaders = (cssOptions, options, loader) => {
         ident: 'postcss',
         plugins: () => [
           require('postcss-flexbugs-fixes'),
-          autoprefixer({
-            flexbox: 'no-2009',
+          require('postcss-preset-env')({
+            autoprefixer: {
+              flexbox: 'no-2009',
+            },
+            stage: 3,
           }),
         ],
       },
@@ -134,7 +139,7 @@ const getCssLoaders = (config) => [
 module.exports = {
   mode: 'development',
   // You may want 'eval' instead if you prefer to see the compiled output in DevTools.
-  // See the discussion in https://github.com/facebookincubator/create-react-app/issues/343.
+  // See the discussion in https://github.com/facebook/create-react-app/issues/343.
   devtool: 'eval',
   // These are the "entry points" to our application.
   // This means they will be the "root" imports that are included in JS bundle.
@@ -157,12 +162,7 @@ module.exports = {
     // initialization, it doesn't blow up the WebpackDevServer client, and
     // changing JS code would still trigger a refresh.
   ],
-  externals: [
-    babelRuntimeExternals,
-    {
-      'object-assign': 'Object.assign',
-    },
-  ],
+  externals: [babelRuntimeExternals],
   output: {
     // Add /* filename */ comments to generated require()s in the output.
     pathinfo: true,
@@ -181,7 +181,7 @@ module.exports = {
     // https://medium.com/webpack/webpack-4-code-splitting-chunk-graph-and-the-splitchunks-optimization-be739a861366
     splitChunks: {
       chunks: 'all',
-      name: 'vendors',
+      name: false,
     },
     // Keep the runtime chunk seperated to enable long term caching
     // https://twitter.com/wSokra/status/969679223278505985
@@ -199,7 +199,7 @@ module.exports = {
     // These are the reasonable defaults supported by the Node ecosystem.
     // We also include JSX as a common component filename extension to support
     // some tools, although we do not recommend using it, see:
-    // https://github.com/facebookincubator/create-react-app/issues/290
+    // https://github.com/facebook/create-react-app/issues/290
     // `web` extension prefixes have been added for better support
     // for React Native Web.
     extensions: [
@@ -228,12 +228,22 @@ module.exports = {
       'react-native': 'react-native-web',
     },
     plugins: [
+      // Adds support for installing with Plug'n'Play, leading to faster installs and adding
+      // guards against forgotten dependencies and such.
+      PnpWebpackPlugin,
       // Prevents users from importing files from outside of src/ (or node_modules/).
       // This often causes confusion because we only process files within src/ with babel.
       // To fix this, we prevent you from importing files out of src/ -- if you'd like to,
       // please link the files into your node_modules/ and let module-resolution kick in.
       // Make sure your source files are compiled, as they will not be processed in any way.
       new ModuleScopePlugin(paths.appSrc, [paths.appPackageJson]),
+    ],
+  },
+  resolveLoader: {
+    plugins: [
+      // Also related to Plug'n'Play, but this time it tells Webpack to load its loaders
+      // from the current package.
+      PnpWebpackPlugin.moduleLoader(module),
     ],
   },
   module: {
@@ -259,24 +269,62 @@ module.exports = {
           },
           // Process application JS with Babel.
           {
-            test: /\.(ts|tsx|js|jsx|mjs)$/,
+            test: /\.(ts|tsx|js|jsx)$/,
             include: paths.appSrc,
             loader: require.resolve('babel-loader'),
             options: {
               // @remove-on-eject-begin
               babelrc: false,
               ...customConfig.babelrc,
+              // Make sure we have a unique cache identifier, erring on the
+              // side of caution.
+              // We remove this when the user ejects because the default
+              // is sane and uses Babel options. Instead of options, we use
+              // the react-scripts version.
+              cacheIdentifier: getCacheIdentifier('development', [
+                'babel-plugin-named-asset-import',
+                'react-dev-utils',
+                'react-scripts',
+              ]),
               // @remove-on-eject-end
               // This is a feature of `babel-loader` for webpack (not Babel itself).
               // It enables caching results in ./node_modules/.cache/babel-loader/
               // directory for faster rebuilds.
               cacheDirectory: true,
+              // Don't waste time on Gzipping the cache
               cacheCompression: false,
-              highlightCode: true,
+            },
+          },
+          // Process any JS outside of the app with Babel.
+          // Unlike the application JS, we only compile the standard ES features.
+          {
+            test: /\.js$/,
+            exclude: /@babel(?:\/|\\{1,2})runtime/,
+            loader: require.resolve('babel-loader'),
+            options: {
+              babelrc: false,
+              configFile: false,
+              compact: false,
+              ...customConfig.babelrc,
+              cacheDirectory: true,
+              // Don't waste time on Gzipping the cache
+              cacheCompression: false,
+              // @remove-on-eject-begin
+              cacheIdentifier: getCacheIdentifier('development', [
+                'babel-plugin-named-asset-import',
+                'babel-preset-react-app',
+                'react-dev-utils',
+                'react-scripts',
+              ]),
+              // @remove-on-eject-end
+              // If an error happens in a package, it's possible to be
+              // because it was compiled. Thus, we don't want the browser
+              // debugger to show the original code. Instead, the code
+              // being evaluated would be much more helpful.
+              sourceMaps: false,
             },
           },
           ...getCssLoaders(customConfig.css),
-
           // "file" loader makes sure those assets get served by WebpackDevServer.
           // When you `import` an asset, you get its (virtual) filename.
           // In production, they would get copied to the `build` folder.
@@ -287,7 +335,7 @@ module.exports = {
             // its runtime that would otherwise be processed through "file" loader.
             // Also exclude `html` and `json` extensions so they get processed
             // by webpacks internal loaders.
-            exclude: [/\.(js|jsx|mjs)$/, /\.html$/, /\.json$/],
+            exclude: [/\.(js|jsx)$/, /\.html$/, /\.json$/],
             loader: require.resolve('file-loader'),
             options: {
               name: 'static/media/[name].[hash:8].[ext]',
@@ -309,11 +357,13 @@ module.exports = {
     // The public URL is available as %PUBLIC_URL% in index.html, e.g.:
     // <link rel="shortcut icon" href="%PUBLIC_URL%/favicon.ico">
     // In development, this will be an empty string.
-    // NOTE: Be sure that you put it AFTER the HtmlWebpackPlugin; otherwise it won't work
-    new InterpolateHtmlPlugin({
+    new InterpolateHtmlPlugin(HtmlWebpackPlugin, {
       ...env.raw,
       ...customConfig.resources,
     }),
+    // This gives some necessary context to module not found errors, such as
+    // the requesting resource.
+    new ModuleNotFoundPlugin(paths.appPath),
     // Makes some environment variables available to the JS code, for example:
     // if (process.env.NODE_ENV === 'development') { ... }. See `./env.js`.
     new webpack.DefinePlugin(env.stringified),

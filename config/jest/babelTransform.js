@@ -12,5 +12,6 @@ const custom = require('../custom');
 
 module.exports = babelJest.createTransformer({
   babelrc: false,
+  configFile: false,
   ...custom.babelrc,
 });
